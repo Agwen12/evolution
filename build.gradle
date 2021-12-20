@@ -1,4 +1,5 @@
 plugins {
+    id 'application'
     id 'java'
 }
 
@@ -11,5 +12,13 @@ repositories {
 
 dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
+}
+
+test {
+    useJUnitPlatform()
+}
+
+application {
+    getMainClass().set('agh.ics.project.World')
 }
 
