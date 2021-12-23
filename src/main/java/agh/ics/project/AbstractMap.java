@@ -26,7 +26,7 @@ public abstract class AbstractMap {
         Vector2d center = new Vector2d(this.width / 2, this.height / 2);
         int jungleWidth = (int) (this.width * jungleRatio);
         int jungleHeight = (int) (this.height * jungleRatio);
-        lowerJungleCorner = new Vector2d(center.x - jungleWidth / 2, center.y - jungleHeight / 2);
-        upperJungleCorner = new Vector2d(center.x + jungleWidth / 2, center.y + jungleHeight / 2);
+        this.lowerJungleCorner = new Vector2d(center.x - jungleWidth / 2, center.y - jungleHeight / 2);
+        this.upperJungleCorner = new Vector2d(center.x + jungleWidth / 2, center.y + jungleHeight / 2);
     }
 }
