@@ -1,6 +1,5 @@
 package agh.ics.project;
 
-import java.util.List;
 import java.util.Random;
 
 
@@ -9,8 +8,6 @@ public class Animal extends AbstractOrganism implements IPositionObserver {
     public Orientation orientation;
     private final AbstractMap map;
     public Genotype genotype;
-    private int lifeTime = 0;
-    private int children = 0;
 
     public Animal(AbstractMap map, Vector2d position, int energy) {
         this.position = position;
@@ -32,35 +29,18 @@ public class Animal extends AbstractOrganism implements IPositionObserver {
         this.orientation = Orientation.values()[rand.nextInt(8)]; // #losowa orientacja
     }
 
-    public Animal(AbstractMap map, Animal animal, Vector2d position, int energy) {
-        this.map = map;
-        this.position = position;
-        this.energy = energy;
-        this.orientation = animal.orientation;
-        this.genotype = animal.genotype.clone();
-    }
-
 
     public void move() {
-        if(!this.isDead()) {
-            this.lifeTime += 1;
-            int action = this.genotype.getAction();
-            this.orientation = this.orientation.rotate(action);
-            if (action == 0 || action == 4) {
-                Vector2d newPosition = this.map.moveAnimal(this.position, this.orientation);
-                this.positionChanged(this, this.position, newPosition);
-                this.position = newPosition;
-            }
-            loosEnergy();
+        int action = this.genotype.getAction();
+        this.orientation = this.orientation.rotate(action);
+        if (action == 0 || action == 4) {
+            Vector2d newPosition = this.map.moveAnimal(this.position, this.orientation);
+             this.positionChanged(this, this.position, newPosition);
+             this.position = newPosition;
         }
-    }
 
-    public int getLifeTime() {
-        return this.lifeTime;
-    }
+        loosEnergy();
 
-    public int getChildren() {
-        return this.children;
     }
 
     @Override
@@ -74,23 +54,23 @@ public class Animal extends AbstractOrganism implements IPositionObserver {
         if (!(o instanceof Animal)) return false;
 
         Animal animal = (Animal) o;
+        if (energy != animal.energy) return false;
+        if (orientation != animal.orientation) return false;
         if (!position.equals(animal.position)) return false;
         return genotype.equals(animal.genotype);
     }
 
     private void loosEnergy() {
-        this.energy = this.energy -  1;
+        this.energy -= 1;
     }
 
-    //TODO tak
-    public int fuck(boolean magic) {
-        this.energy = magic ? this.energy : 3 * this.energy / 4;
-        this.children += 1;
+    public int fuck() {
+        this.energy = 3 * this.energy / 4;
         return this.energy / 4;
     }
 
-    public void eat(int eatGain) {
-        energy += eatGain; //TODO this should be a param
+    public void eat() {
+        energy += 10; //TODO this should be a param
     }
 
     @Override

@@ -4,8 +4,8 @@ import java.util.*;
 
 public class MapCell {
     private final SortedSet<AbstractOrganism> cellSet = new TreeSet<>(((o1, o2) -> {
-        if(o1 instanceof Grass) return -1;
         if (o1.equals(o2)) return 0;
+        if(o1 instanceof Grass) return -1;
         if(o1.energy > o2.energy) return 1;
         else if (o1.energy < o2.energy) return -1;
         else {
@@ -14,10 +14,11 @@ public class MapCell {
         }
         return 1;
     }));
-
+    private Vector2d cellPosition;
 
     public MapCell(AbstractOrganism organism) {
         cellSet.add(organism);
+        cellPosition = organism.position;
     }
 
     public MapCell(){};
@@ -28,19 +29,18 @@ public class MapCell {
     }
 
     public Animal getBiggestEnergy() {
-        if (cellSet.isEmpty()) return null;
         AbstractOrganism first = this.cellSet.last();
         if (first instanceof Animal) return (Animal) first;
         return null;
     }
 
     public Animal getSecond() {
-
-        if (cellSet.size() > 1) {
-            AbstractOrganism[] array = cellSet.toArray(AbstractOrganism[]::new);
-            if (array[array.length - 2] instanceof Animal) return (Animal) array[array.length - 2];
-        }
-        return null;
+        AbstractOrganism biggest = getBiggestEnergy();
+        this.cellSet.remove(biggest);
+        AbstractOrganism sc = this.cellSet.last();
+        this.cellSet.add(biggest);
+        if (sc instanceof Animal) return (Animal) sc;
+        else return null;
     }
 
     public List<AbstractOrganism> getContents() {
@@ -48,24 +48,15 @@ public class MapCell {
     }
 
     public boolean hasGrass() {
-        return !cellSet.isEmpty() && this.cellSet.first() instanceof Grass;
+        return this.cellSet.first() instanceof Grass;
     }
 
-    public Grass getGrass() {
-        if (this.hasGrass()) return (Grass) this.cellSet.first();
-        return null;
+    public AbstractOrganism getGrass() {
+        return this.cellSet.first();
     }
 
     public boolean removeElement(AbstractOrganism organism) {
         return this.cellSet.remove(organism);
-    }
-
-    public boolean isEmpty() {
-        return this.cellSet.isEmpty();
-    }
-
-    public int animalSize() {
-        return this.hasGrass() ? cellSet.size() - 1: cellSet.size();
     }
 
     @Override

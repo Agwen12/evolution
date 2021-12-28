@@ -5,18 +5,12 @@ import java.util.Map;
 import java.util.Set;
 
 public abstract class AbstractMap implements IPositionObserver {
-    //TODO make this final
-    public int height;
-    public int width;
+    protected int height;
+    protected int width;
     protected float jungleRatio;
     protected Vector2d lowerJungleCorner;
     protected Vector2d upperJungleCorner;
-    protected final Map<Vector2d, MapCell> mapElements = new HashMap<>();
-
-    public Map<Vector2d, MapCell> getMapElements() {
-        return mapElements;
-    }
-
+    protected Map<Vector2d, MapCell> mapElements = new HashMap<>();
 
     /**
      * @param currPosition
@@ -59,14 +53,12 @@ public abstract class AbstractMap implements IPositionObserver {
         return this.mapElements.get(position);
     }
 
-    public boolean isPositionFree(Vector2d position) {
-        return !mapElements.containsKey(position) || mapElements.get(position).isEmpty();
-    }
 
     @Override
     public void positionChanged(Animal animal, Vector2d oldPosition, Vector2d newPosition) {
         this.removeObject(animal, oldPosition);
         this.placeObject(animal, newPosition);
+        System.out.println("d");
     }
 
     @Override

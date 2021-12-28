@@ -20,11 +20,6 @@ public class Genotype {
         Collections.sort(this.genes);
     }
 
-    public Genotype(List<Integer> list) {
-        this.genes = new ArrayList<>(list);
-        Collections.sort(this.genes);
-    }
-
     public List<Integer> getLeftGenes(double percent) {
         return this.genes.subList(0, (int) (percent * 32));
     }
@@ -35,10 +30,6 @@ public class Genotype {
 
     public Integer getAction(){
         return this.genes.get(new Random().nextInt(32));
-    }
-
-    public Genotype clone() {
-        return new Genotype(this.genes);
     }
 
 
