@@ -42,6 +42,5 @@ public enum Orientation {
                 return new Vector2d(-1, 1);
             }
         }
-
     }
 }

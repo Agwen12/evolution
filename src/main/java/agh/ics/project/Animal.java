@@ -9,7 +9,6 @@ import java.util.Random;
 
 public class Animal extends AbstractOrganism implements IPositionObserver, Trackable {
 
-
     private final Random rand = new Random();
     public Orientation orientation;
     private final AbstractMap map;
@@ -51,7 +50,6 @@ public class Animal extends AbstractOrganism implements IPositionObserver, Track
     public void move(int looseEnergy) {
         this.push();
         if(!this.isDead()) {
-
             this.lifeTime += 1;
             int action = this.genotype.getAction();
             this.orientation = this.orientation.rotate(action);
@@ -65,14 +63,26 @@ public class Animal extends AbstractOrganism implements IPositionObserver, Track
         }
     }
 
+    public void eat(int eatGain) {
+        energy += eatGain;
+    }
+
+    private void loosEnergy(int looseEnergy) {
+        this.energy = this.energy -  looseEnergy;
+    }
+
     public int getEnergy() { return this.energy; }
+
     public int getLifeTime() {
         return this.lifeTime;
     }
+
     public int getChildren() {
         return this.children;
     }
+
     public Trackable getTracker() { return tracker; }
+
     public void setTracker(Trackable tracker) {
         this.tracker = tracker;
         this.childrenList.clear();
@@ -93,20 +103,11 @@ public class Animal extends AbstractOrganism implements IPositionObserver, Track
         return genotype.equals(animal.genotype);
     }
 
-    private void loosEnergy(int looseEnergy) {
-        this.energy = this.energy -  looseEnergy;
-    }
-
     public int procreate(Animal child, boolean magic) {
-//        if (this.tracker != null)
         this.childrenList.add(child);
         this.energy = magic ? this.energy : 3 * this.energy / 4;
         this.children += 1;
         return this.energy / 4;
-    }
-
-    public void eat(int eatGain) {
-        energy += eatGain;
     }
 
     @Override

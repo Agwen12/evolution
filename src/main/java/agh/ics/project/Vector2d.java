@@ -13,11 +13,6 @@ public class Vector2d {
         this.y = y;
     }
 
-    @Override
-    public String toString() {
-        return "(" + x + "," + y + ")";
-    }
-
     public boolean precedes(Vector2d other) {
         return this.x <= other.x && this.y <= other.y;
     }
@@ -26,16 +21,12 @@ public class Vector2d {
         return this.x >= other.x && this.y >= other.y;
     }
 
-    public Vector2d upperRight(Vector2d other) {
-        return new Vector2d(Math.max(other.x, this.x), Math.max(other.y, this.y));
-    }
-
-    public Vector2d lowerLeft(Vector2d other) {
-        return new Vector2d(Math.min(other.x, this.x), Math.min(other.y, this.y));
-    }
-
     public Vector2d add(Vector2d other) {
         return new Vector2d(this.x + other.x, this.y + other.y);
+    }
+
+    public Vector2d opposite() {
+        return new Vector2d(-this.x, -this.y);
     }
 
     public Vector2d addModulo(Vector2d other, int moduloW, int moduloH) {
@@ -50,10 +41,6 @@ public class Vector2d {
         }
     }
 
-    public Vector2d subtract(Vector2d other) {
-        return new Vector2d(this.x - other.x, this.y - other.y);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -63,15 +50,14 @@ public class Vector2d {
                 y == vector2d.y;
     }
 
-    public Vector2d opposite() {
-        return new Vector2d(-this.x, -this.y);
-    }
-
     @Override
     public int hashCode() {
         return Objects.hash(x, y);
     }
 
-
+    @Override
+    public String toString() {
+        return "(" + x + "," + y + ")";
+    }
 
 }

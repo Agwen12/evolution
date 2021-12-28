@@ -3,6 +3,7 @@ package agh.ics.project;
 import java.util.AbstractMap;
 
 public class AbstractOrganism {
+
     protected Vector2d position;
     public int energy;
 

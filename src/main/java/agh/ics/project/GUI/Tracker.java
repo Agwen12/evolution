@@ -69,9 +69,10 @@ public class Tracker implements Trackable {
     @Override
     public void push() {
         System.out.println(animal);
-        System.out.println("TRAKER TRACKER TRACKER");
         childrenField.setText(Integer.toString(this.animal.getChildren()));
         descendantsField.setText(Integer.toString(sumChildren() + this.animal.getChildren()));
-        if (animal.isDead()) deathTimeField.setText(Integer.toString(engine.getEpoch())) ;
+        if (animal.isDead() && "Still ALIVE".equals(deathTimeField.getText())) deathTimeField.setText(Integer.toString(engine.getEpoch()));
+
+
     }
 }

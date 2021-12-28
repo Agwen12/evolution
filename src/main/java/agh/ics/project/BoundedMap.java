@@ -2,7 +2,6 @@ package agh.ics.project;
 
 public class BoundedMap extends AbstractMap {
 
-
     public BoundedMap(int height, int width, float jungleRatio) {
         this.height = height;
         this.width = width;

@@ -12,19 +12,6 @@ public abstract class AbstractMap implements IPositionObserver {
     protected Vector2d upperJungleCorner;
     protected final Map<Vector2d, MapCell> mapElements = new HashMap<>();
 
-    public Map<Vector2d, MapCell> getMapElements() {
-        return mapElements;
-    }
-
-
-    /**
-     * @param currPosition
-     *          Animal current position
-     * @param orientation
-     *         Animal orientation
-     *
-     * @return position for animal on given position specific map
-     */
     public abstract Vector2d moveAnimal(Vector2d currPosition, Orientation orientation);
 
     protected void placeJungle() {
@@ -55,6 +42,10 @@ public abstract class AbstractMap implements IPositionObserver {
 
     public MapCell getMapCellAt(Vector2d position) {
         return this.mapElements.get(position);
+    }
+
+    public Map<Vector2d, MapCell> getMapElements() {
+        return mapElements;
     }
 
     public boolean isPositionFree(Vector2d position) {

@@ -15,11 +15,11 @@ public class MapCell {
         return 1;
     }));
 
-
     public MapCell(AbstractOrganism organism) {
         cellSet.add(organism);
     }
-    public MapCell(){};
+
+    public MapCell(){}
 
     public void placeElement(AbstractOrganism organism) {
         this.cellSet.add(organism);
@@ -39,7 +39,6 @@ public class MapCell {
         }
         return null;
     }
-
 
     public Grass getGrass() {
         if (this.hasGrass()) return (Grass) this.cellSet.first();

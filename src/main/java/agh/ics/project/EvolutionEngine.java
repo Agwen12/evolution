@@ -153,13 +153,13 @@ public class EvolutionEngine implements Runnable, IEngineObserver {
         List<Vector2d> savana = freePositions.get(1);
         if (jungle.size() > 0) {
             Vector2d jungleVec = jungle.get(rand.nextInt(jungle.size()));
-            Grass grass = new Grass(map, jungleVec);
+            Grass grass = new Grass(jungleVec);
             map.placeObject(grass, jungleVec);
             this.engineGrass.add(grass);
         }
         if (savana.size() > 0) {
             Vector2d savanaVec = savana.get(rand.nextInt(savana.size()));
-            Grass grass = new Grass(map, savanaVec);
+            Grass grass = new Grass(savanaVec);
             map.placeObject(grass, savanaVec);
             this.engineGrass.add(grass);
         }
@@ -194,8 +194,8 @@ public class EvolutionEngine implements Runnable, IEngineObserver {
                 boolean magicHappened = makeSweetLove();
                 plantGrass();
                 makeMoves(this.map instanceof TorusMap, this.getStats(), magicHappened);
-//                System.out.println(epoch);
                 this.epoch += 1;
+                if (engineAnimal.size() < 1) break;
                 try {
                     TimeUnit.SECONDS.sleep(1);
                 } catch (InterruptedException e) {

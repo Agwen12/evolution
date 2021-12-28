@@ -301,16 +301,20 @@ public class App extends Application implements IEngineObserver {
     @Override
     public void makeMoves(boolean isTorus, Map<String, Double> stats, boolean magicHappened) {
         Platform.runLater( () -> {
+            try {
 
-            if (isTorus)  {
-                displayMap(this.gridT, mapT);
-                chartContainerT.updateCharts(stats);
-            } else {
-                displayMap(this.gridB, mapB);
-                chartContainerB.updateCharts(stats);
+
+                if (isTorus) {
+                    displayMap(this.gridT, mapT);
+                    chartContainerT.updateCharts(stats);
+                } else {
+                    displayMap(this.gridB, mapB);
+                    chartContainerB.updateCharts(stats);
+                }
+                showMagicAlert(isTorus, stats.get("epoch").toString(), magicHappened);
+            } catch (NullPointerException e) {
+                e.fillInStackTrace();
             }
-            showMagicAlert(isTorus, stats.get("epoch").toString() ,magicHappened);
-
         });
     }
 

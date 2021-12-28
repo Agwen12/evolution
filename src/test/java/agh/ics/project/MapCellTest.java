@@ -14,7 +14,7 @@ class MapCellTest {
         Animal a3 = new Animal(map, new Vector2d(1,2), 12);
         Animal a4 = new Animal(map, new Vector2d(1,2), 12);
         Animal a5 = new Animal(map, new Vector2d(0, 0), 100);
-        Grass g1 = new Grass(map, new Vector2d(1,1));
+        Grass g1 = new Grass(new Vector2d(1,1));
         MapCell mapCell = new MapCell();
         mapCell.placeElement(a1);
         mapCell.placeElement(a2);
@@ -34,7 +34,7 @@ class MapCellTest {
         Animal a3 = new Animal(map, new Vector2d(1,2), 12);
         Animal a4 = new Animal(map, new Vector2d(1,2), 12);
         Animal a5 = new Animal(map, new Vector2d(0, 0), 100);
-        Grass g1 = new Grass(map, new Vector2d(1,1));
+        Grass g1 = new Grass(new Vector2d(1,1));
         MapCell mapCell = new MapCell();
         mapCell.placeElement(a1);
         mapCell.placeElement(a2);
@@ -54,7 +54,7 @@ class MapCellTest {
         Animal a3 = new Animal(map, new Vector2d(1,2), 12);
         Animal a4 = new Animal(map, new Vector2d(1,2), 12);
         Animal a5 = new Animal(map, new Vector2d(0, 0), 100);
-        Grass g1 = new Grass(map, new Vector2d(1,1));
+        Grass g1 = new Grass(new Vector2d(1,1));
         map.placeObject(a1);
         map.placeObject(a2);
         map.placeObject(a3);

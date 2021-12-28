@@ -15,7 +15,6 @@ public class ChartContainer {
     private final LineChart<Number, Number> lifeTime;
     private final LineChart<Number, Number> children;
 
-
     public ChartContainer() {
         energy = getChart("Average Energy");
         lifeTime = getChart("Average LifeTime");

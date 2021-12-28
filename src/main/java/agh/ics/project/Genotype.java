@@ -51,9 +51,7 @@ public class Genotype {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Genotype)) return false;
-
         Genotype genotype = (Genotype) o;
-
         return genes != null ? genes.equals(genotype.genes) : genotype.genes == null;
     }
 

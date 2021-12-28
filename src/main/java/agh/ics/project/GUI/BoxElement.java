@@ -36,7 +36,7 @@ public class BoxElement {
             rectangle.setFill(Color.rgb(0,0,255));
         }
         vbox = new VBox();
-        if (!organism.isDead()) vbox.getChildren().addAll(rectangle); //hackish but why not
+        if (!organism.isDead()) vbox.getChildren().addAll(rectangle);
     }
 
     private void showInfo(Animal animal) {
@@ -55,8 +55,6 @@ public class BoxElement {
             Tracker tracker = new Tracker(this.engine, animal);
             animal.setTracker(tracker);
             tracker.show();
-        } else {
-
         }
     }
 
