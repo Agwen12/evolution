@@ -1,5 +1,6 @@
 package agh.ics.project;
 
+import com.sun.javafx.collections.MappingChange;
 import javafx.scene.chart.LineChart;
 
 import java.util.*;
@@ -8,6 +9,8 @@ import java.util.stream.Collectors;
 
 public class EvolutionEngine implements Runnable, IEngineObserver {
 
+    private Map<Genotype, Integer> genPool = new HashMap<>();
+    private boolean isPaused = false;
     private final int moveCost;
     private final int eatingGain;
     private final int startEnergy;
@@ -28,6 +31,7 @@ public class EvolutionEngine implements Runnable, IEngineObserver {
         this.eatingGain = 3;
         for (int i = 0; i < numberOfAnimals; i++) {
             Animal a = new Animal(map, new Vector2d(rand.nextInt(map.width), rand.nextInt(map.height)), startEnergy);
+            addToGenePool(a);
             map.placeObject(a);
             engineAnimal.add(a);
         }
@@ -43,6 +47,7 @@ public class EvolutionEngine implements Runnable, IEngineObserver {
         for (int i = 0; i < numberOfAnimals; i++) {
             Animal a = new Animal(map, new Vector2d(rand.nextInt(map.width), rand.nextInt(map.height)), startEnergy);
             map.placeObject(a);
+            addToGenePool(a);
             engineAnimal.add(a);
         }
     }
@@ -61,6 +66,7 @@ public class EvolutionEngine implements Runnable, IEngineObserver {
 
     private Animal cutDead(Animal animal) {
         if (animal.isDead()) {
+            removeFromGenePool(animal);
             this.deathTime.add(animal.getLifeTime());
             this.map.removeObject(animal, animal.getPosition());
             return null;
@@ -88,11 +94,12 @@ public class EvolutionEngine implements Runnable, IEngineObserver {
                 Animal first = cell.getBiggestEnergy();
                 Animal second = cell.getSecond();
 
-                if (second != null && first != null && second.energy >= 50 / 2) {
-                    //TODO maybe change it later, 50 should be @param starEnergy
-                    first.fuck(this.magicReproduction);
-                    second.fuck(this.magicReproduction);
+                if (second != null && first != null && second.energy >= startEnergy / 2) {
+                    //TODO maybe change it later
                     Animal newAnimal = new Animal(map, first, second);
+                    first.fuck(newAnimal, this.magicReproduction);
+                    second.fuck(newAnimal, this.magicReproduction);
+                    addToGenePool(newAnimal);
                     map.placeObject(newAnimal);
                     engineAnimal.add(newAnimal);
                 }
@@ -111,6 +118,7 @@ public class EvolutionEngine implements Runnable, IEngineObserver {
                 Vector2d randomFreePosition = freePositions.get(index);
                 freePositions.remove(index);
                 Animal newAnimal = new Animal(map, animal, randomFreePosition, startEnergy);
+                addToGenePool(newAnimal);
                 tempAnimals.add(newAnimal);
                 map.placeObject(newAnimal, randomFreePosition);
             }
@@ -164,38 +172,70 @@ public class EvolutionEngine implements Runnable, IEngineObserver {
     @Override
     public void run() {
         while (true) {
-            removeDeadAnimals();
-            moveAnimals();
-            eatGrass();
-            makeSweetLove();
-            plantGrass();
-            makeMoves(this.map instanceof TorusMap, this.getStats());
-            System.out.println(epoch);
-            this.epoch += 1;
-            try {
-                TimeUnit.SECONDS.sleep(1);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                System.exit(1);
+            if (!this.isPaused) {
+                removeDeadAnimals();
+                moveAnimals();
+                eatGrass();
+                makeSweetLove();
+                plantGrass();
+                makeMoves(this.map instanceof TorusMap, this.getStats());
+                System.out.println(epoch);
+                this.epoch += 1;
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    System.exit(1);
+                }
+            } else {
+                Thread.onSpinWait();
             }
         }
     }
 
-    public void addEngineObserver(IEngineObserver observer) {
-        observers.add(observer);
+    private void addToGenePool(Animal animal) {
+        Integer number = 0;
+        if (this.genPool.containsKey(animal.genotype)) {
+            number = genPool.get(animal.genotype);
+            genPool.remove(animal.genotype);
+        }
+        genPool.put(animal.genotype, number + 1);
     }
 
-    public int getAnimalCounter() {
-        return engineAnimal.size();
+    private void removeFromGenePool(Animal animal) {
+        Integer number = this.genPool.get(animal.genotype);
+        genPool.remove(animal.genotype);
+        if (number > 1) {
+            genPool.put(animal.genotype, number - 1);
+        }
     }
 
-    public int getEpoch() {
-        return epoch;
+    public Genotype getDominantGenotype() {
+        int max = -1;
+        Genotype dominant = null;
+        for (Map.Entry<Genotype, Integer> entry: genPool.entrySet()) {
+
+            if (entry.getValue() >= max) dominant = entry.getKey();
+        }
+        return dominant;
     }
 
-    private int getGrassCounter() {
-        return this.engineGrass.size();
+    public List<Animal> getDomAnimals() {
+        Genotype dominantGen = getDominantGenotype();
+        List<Animal> domAnimals = new LinkedList<>();
+        for (Animal animal: engineAnimal) {
+            if (animal.genotype.equals(dominantGen)) domAnimals.add(animal);
+        }
+        return domAnimals;
     }
+
+    public void addEngineObserver(IEngineObserver observer) { observers.add(observer); }
+    public int getAnimalCounter() { return engineAnimal.size(); }
+    public int getEpoch() { return epoch; }
+    public void setPaused(boolean paused) { isPaused = paused; }
+    private int getGrassCounter() { return this.engineGrass.size(); }
+    public boolean isPaused() { return isPaused; }
+    public int getStartEnergy() { return startEnergy; }
 
     private Map<String, Double> getStats() {
         double lifTimeSum = 0d;

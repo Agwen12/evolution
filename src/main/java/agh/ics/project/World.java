@@ -11,6 +11,9 @@ public class World {
 
     public static void main(String[] args) {
         Application.launch(App.class, args);
+//        String[] a = new String[]{"dupa"};
+//        System.out.println(a.length);
+//        System.out.println(a);
 //        AbstractMap map = new TorusMap(40, 40, 0.2f);
 //        EvolutionEngine engine = new EvolutionEngine(map, 4, 10);
 //        engine.run();

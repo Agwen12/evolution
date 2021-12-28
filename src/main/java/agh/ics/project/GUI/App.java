@@ -3,22 +3,29 @@ package agh.ics.project.GUI;
 import agh.ics.project.*;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
+import java.io.File;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 public class App extends Application implements IEngineObserver {
 
-    private final Object PAUSE_KEY_TORUS = new Object();
-    private final Object PAUSE_KEY_BORDER = new Object();
+    private Label leftDom;
+    private Label rightDom;
     protected final static int CELL_SIZE = 12;
     Map<String, Double> paramMap = new HashMap<>();
     private final HBox root = new HBox();
@@ -32,7 +39,7 @@ public class App extends Application implements IEngineObserver {
     private final ChartContainer chartContainerB = new ChartContainer();
 
 
-    private void loadSimulationArguments() {
+    private void loadSimulationArguments(Stage stage) {
 
         Stage paramStage = new Stage();
         VBox vbox = new VBox();
@@ -41,23 +48,28 @@ public class App extends Application implements IEngineObserver {
         HBox mapDimBox = new HBox();
         mapDimBox.setSpacing(10);
         Label height = new Label("Height: ");
-        TextField heightField = new TextField();
+        TextField heightField = new TextField("20");
+        heightField.setMaxSize(80, 20);
         Label width = new Label("Width: ");
-        TextField widthField = new TextField();
+        TextField widthField = new TextField("20");
+        widthField.setMaxSize(80, 20);
         mapDimBox.getChildren().addAll(height, heightField, width, widthField);
 
         Label jungleRatio = new Label("Jungle Ratio");
-        TextField jungleRatioField = new TextField();
+        TextField jungleRatioField = new TextField("0.2");
+        jungleRatioField.setMaxSize(80, 20);
 
         Label numberOfAnimals = new Label("Number of animals");
-        TextField animalNumberField = new TextField();
-
+        TextField animalNumberField = new TextField("25");
+        animalNumberField.setMaxSize(80, 20);
 
         Label startEnergy = new Label("Start energy");
-        TextField startEnergyField = new TextField();
+        TextField startEnergyField = new TextField("20");
+        startEnergyField.setMaxSize(80, 20);
 
         Label eatingGain = new Label("Gained energy from eating");
-        TextField eatingGainField = new TextField();
+        TextField eatingGainField = new TextField("7");
+        eatingGainField.setMaxSize(80, 20);
 
         Label reproductionType = new Label("Type of reproduction");
         HBox reproductionBox = new HBox();
@@ -65,30 +77,41 @@ public class App extends Application implements IEngineObserver {
         CheckBox border = new CheckBox("Magic in Border");
         reproductionBox.setSpacing(10);
         reproductionBox.getChildren().addAll(torus, border);
+
+        Label moveEnergy = new Label("Move energy");
+        TextField moveEnergyField = new TextField("1");
+        moveEnergyField.setMaxSize(80, 20);
+
         Button loadButton = new Button("Load parameter");
+
         loadButton.setOnAction(action -> {
             try {
-
                 setParamMap(heightField, widthField, jungleRatioField, animalNumberField, startEnergyField,
-                        eatingGainField, torus, border);
-                System.out.println(paramMap);
+                        eatingGainField, moveEnergyField, torus, border);
                 paramStage.close();
+                getEnginesGoing(stage);
             } catch (NumberFormatException | NullPointerException e) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.showAndWait();
             }
         });
+
+        vbox.setAlignment(Pos.CENTER);
         vbox.setSpacing(13);
         vbox.getChildren().addAll(mapDimensions, mapDimBox, jungleRatio, jungleRatioField, numberOfAnimals, animalNumberField,
-                startEnergy, startEnergyField, eatingGain, eatingGainField, reproductionType, reproductionBox, loadButton);
+                startEnergy, startEnergyField, eatingGain, eatingGainField, moveEnergy, moveEnergyField, reproductionType, reproductionBox, loadButton);
+
+        for (Node node: vbox.getChildren()) {
+            VBox.setMargin(node, new Insets(0, 8, 2, 8));
+        }
 
         paramStage.setScene(new Scene(vbox));
-        paramStage.showAndWait();
+        paramStage.show();
     }
 
 
     private void setParamMap(TextField heightField, TextField widthField, TextField jungleRatioField, TextField animalNumberField,
-                             TextField startEnergyField, TextField eatingGainField, CheckBox normal, CheckBox magic) {
+                             TextField startEnergyField, TextField eatingGainField, TextField moveEnergyField, CheckBox normal, CheckBox magic) {
         paramMap.clear();
         paramMap.put("height", Double.parseDouble(heightField.getText()));
         paramMap.put("width", Double.parseDouble(widthField.getText()));
@@ -98,10 +121,13 @@ public class App extends Application implements IEngineObserver {
         paramMap.put("eatingGain", Double.parseDouble(eatingGainField.getText()));
         paramMap.put("reproductionTorus", normal.isSelected() ? 1.d : 0.d);
         paramMap.put("reproductionBorder", magic.isSelected() ? 1.d: 0.d);
+        paramMap.put("moveEnergy", Double.parseDouble(moveEnergyField.getText()));
         System.out.println(paramMap);
     }
 
     private void displayMap(GridPane grid, AbstractMap map) {
+        if (map instanceof TorusMap && engineT != null) leftDom.setText(engineT.getDominantGenotype().toString());
+        if (map instanceof BoundedMap && engineB != null) rightDom.setText(engineB.getDominantGenotype().toString());
         grid.getChildren().clear();
         grid.getRowConstraints().clear();
         grid.getColumnConstraints().clear();
@@ -125,15 +151,16 @@ public class App extends Application implements IEngineObserver {
 
     private void fillCell(Vector2d key, GridPane grid, AbstractMap map) {
         MapCell cell = map.getMapCellAt(key);
+        EvolutionEngine engine = map instanceof TorusMap ? this.engineT: this.engineB;
         if (!cell.isEmpty() && cell.hasGrass()) {
-            VBox box = new BoxElement(cell.getGrass(), 50.0f).getVbox();
+            VBox box = new BoxElement(cell.getGrass(), 50.0f, engine).getVbox();
             grid.add(box, key.x, key.y);
             GridPane.setHalignment(box, HPos.CENTER);
             grid.setGridLinesVisible(false);
             grid.setGridLinesVisible(true);
         }
         if (!cell.isEmpty() && cell.getBiggestEnergy() != null) {
-            VBox box = new BoxElement(cell.getBiggestEnergy(), 50.0f).getVbox();
+            VBox box = new BoxElement(cell.getBiggestEnergy(), 50.0f, engine).getVbox();
             grid.add(box, key.x, key.y);
             GridPane.setHalignment(box, HPos.CENTER);
             grid.setGridLinesVisible(false);
@@ -141,29 +168,70 @@ public class App extends Application implements IEngineObserver {
         }
     }
 
-    private void stopAnimation(Object pauseKey) {
-        try {
-            pauseKey.wait();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    private void stopAnimation(EvolutionEngine engine) { engine.setPaused(true); }
+    private void startAnimation(EvolutionEngine engine) {
+        engine.setPaused(false);
     }
 
-    private void startAnimation(Object pauseKey) {
-        pauseKey.notify();
+    private void safeData(ChartContainer chartContainer, boolean isLeft) throws IOException {
+        String mapSymbol = isLeft ? "Torus" : "Border";
+        String fileName = "stats_" + mapSymbol + "_" + System.currentTimeMillis() + ".csv";
+        File file = new File(fileName);
+        file.createNewFile();
+        CSVWriter writer = new CSVWriter(file, null);
+        writer.writeHeader(new String[] {"epoch", "Animals", "Grass", "Average energy", "Average lifespan", "Average kids"});
+
+        ObservableList<XYChart.Data<Number, Number>> animal = chartContainer.getAnimal();
+        ObservableList<XYChart.Data<Number, Number>> grass = chartContainer.getGrass();
+        ObservableList<XYChart.Data<Number, Number>> energy = chartContainer.getEnergy();
+        ObservableList<XYChart.Data<Number, Number>> children = chartContainer.getChildren();
+        ObservableList<XYChart.Data<Number, Number>> lifeSpan = chartContainer.getLifeTime();
+        for (int i = 0; i < animal.size(); i++) {
+            String[] row = new String[] {
+                    animal.get(i).getXValue().toString(),
+                    animal.get(i).getYValue().toString(),
+                    grass.get(i).getYValue().toString(),
+                    energy.get(i).getYValue().toString(),
+                    children.get(i).getYValue().toString(),
+                    lifeSpan.get(i).getYValue().toString()
+            };
+            writer.writeData(row);
+        }
+        writer.close();
+    }
+
+    private void showDomAlert(EvolutionEngine engine) {
+        if (engine.isPaused()) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Dominant Genotype");
+            alert.setHeaderText("Animals with dominant genotype:\n" + engine.getDominantGenotype().toString());
+            alert.setContentText(engine.getDomAnimals().toString());
+            alert.showAndWait();
+        }
     }
 
     public VBox setUpBox(GridPane grid, boolean isLeft) {
         Button startT = new Button("Start");
         Button stopT = new Button("Stop");
+        Button safeData = new Button("Safe Data");
         startT.setMinSize(80d, 30);
-        startT.setOnAction((event) -> startAnimation(isLeft ? PAUSE_KEY_TORUS : PAUSE_KEY_BORDER ));
+        startT.setOnAction((event) -> startAnimation(isLeft ? this.engineT : this.engineB));
         stopT.setMinSize(80d, 30);
-        stopT.setOnAction((event) -> stopAnimation(isLeft ? PAUSE_KEY_TORUS : PAUSE_KEY_BORDER ));
-        HBox buttonBox = new HBox(startT, stopT);
+        stopT.setOnAction((event) -> stopAnimation(isLeft ? this.engineT : this.engineB ));
+        safeData.setMinSize(80d, 30);
+        safeData.setOnAction(event -> {
+            try { safeData(isLeft ? chartContainerT : chartContainerB, isLeft);
+            } catch (IOException e) {
+                e.printStackTrace(); } });
+        Button domButton = new Button("Show dominant");
+        domButton.setMinSize(80d, 30);
+        domButton.setOnAction((event -> showDomAlert(isLeft ? this.engineT : this.engineB)));
+        HBox buttonBox = new HBox(startT, stopT, safeData, domButton);
         buttonBox.setSpacing(24);
         buttonBox.setAlignment(Pos.CENTER);
-        Label domGenT = new Label("dd");
+        Label domGenT = new Label();
+        if (isLeft) leftDom = domGenT;
+        else rightDom = domGenT;
 
         VBox charts  = isLeft ? chartContainerT.getCharts(): chartContainerB.getCharts();
 
@@ -174,44 +242,29 @@ public class App extends Application implements IEngineObserver {
         return box;
     }
 
-
-    @Override
-    public void start(Stage primaryStage) throws Exception {
-        root.setAlignment(Pos.CENTER);
-        root.setSpacing(120);
-        loadSimulationArguments();
-
-//        this.mapT = new TorusMap(paramMap.get("height").intValue(), paramMap.get("width").intValue(),
-//                paramMap.get("jungleRatio").floatValue());
-//        this.engineT = new EvolutionEngine(mapT, paramMap.get("animalNumber").intValue(),
-//                paramMap.get("startEnergy").intValue(), paramMap.get("reproductionTorus") > 0,
-//                paramMap.get("eatingGain").intValue(), 11);
-//
-//        this.mapB = new TorusMap(paramMap.get("height").intValue(), paramMap.get("width").intValue(),
-//                paramMap.get("jungleRatio").floatValue());
-//        this.engineB = new EvolutionEngine(mapB, paramMap.get("animalNumber").intValue(),
-//                paramMap.get("startEnergy").intValue(), paramMap.get("reproductionBorder") > 0,
-//                paramMap.get("eatingGain").intValue(), 11);
-
-        this.mapT = new TorusMap(20, 20, 0.2f);
-        this.engineT = new EvolutionEngine(mapT, 20, 20, true, 10, 1);
+    private void getEnginesGoing(Stage primaryStage) {
+        this.mapT = new TorusMap(paramMap.get("height").intValue(), paramMap.get("width").intValue(),
+                paramMap.get("jungleRatio").floatValue());
+        this.engineT = new EvolutionEngine(mapT, paramMap.get("animalNumber").intValue(),
+                paramMap.get("startEnergy").intValue(), (paramMap.get("reproductionTorus") > 0),
+                paramMap.get("eatingGain").intValue(), paramMap.get("moveEnergy").intValue());
         this.engineT.addEngineObserver(this);
-
-        this.mapB = new BoundedMap(20, 20, 0.2f);
-        this.engineB = new EvolutionEngine(mapB, 20, 20, true, 10, 1);
+//
+        this.mapB = new BoundedMap(paramMap.get("height").intValue(), paramMap.get("width").intValue(),
+                paramMap.get("jungleRatio").floatValue());
+        this.engineB = new EvolutionEngine(mapB, paramMap.get("animalNumber").intValue(),
+                paramMap.get("startEnergy").intValue(), paramMap.get("reproductionBorder") > 0,
+                paramMap.get("eatingGain").intValue(), paramMap.get("moveEnergy").intValue());
         this.engineB.addEngineObserver(this);
-
 
 
         Thread engineThreadT = new Thread(engineT);
         engineThreadT.start();
+
         VBox leftBox = setUpBox(gridT, true);
         displayMap(this.gridT, mapT);
         root.getChildren().add(leftBox);
         HBox.setMargin(leftBox, new Insets(7,10,5,10));
-
-
-
 
         Thread engineThreadB = new Thread(engineB);
         engineThreadB.start();
@@ -225,6 +278,14 @@ public class App extends Application implements IEngineObserver {
         Scene scene = new Scene(scrollPane);
         primaryStage.setScene(scene);
         primaryStage.show();
+    }
+
+
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        root.setAlignment(Pos.CENTER);
+        root.setSpacing(120);
+        loadSimulationArguments(primaryStage);
     }
 
     @Override

@@ -44,8 +44,21 @@ public class Genotype {
 
     @Override
     public String toString() {
-        return "Genotype{" +
-                "genes=" + genes +
-                '}';
+        return genes.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Genotype)) return false;
+
+        Genotype genotype = (Genotype) o;
+
+        return genes != null ? genes.equals(genotype.genes) : genotype.genes == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return genes != null ? genes.hashCode() : 0;
     }
 }

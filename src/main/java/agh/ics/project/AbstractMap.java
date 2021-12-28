@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Set;
 
 public abstract class AbstractMap implements IPositionObserver {
-    //TODO make this final
     public int height;
     public int width;
     protected float jungleRatio;

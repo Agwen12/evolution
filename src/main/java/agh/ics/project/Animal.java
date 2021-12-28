@@ -1,16 +1,21 @@
 package agh.ics.project;
 
+import agh.ics.project.GUI.Trackable;
+
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
 
-public class Animal extends AbstractOrganism implements IPositionObserver {
+public class Animal extends AbstractOrganism implements IPositionObserver, Trackable {
     private final Random rand = new Random();
     public Orientation orientation;
     private final AbstractMap map;
-    public Genotype genotype;
+    public final Genotype genotype;
     private int lifeTime = 0;
     private int children = 0;
+    private Trackable tracker;
+    public List<Animal> childrenList = new LinkedList<>();
 
     public Animal(AbstractMap map, Vector2d position, int energy) {
         this.position = position;
@@ -52,15 +57,20 @@ public class Animal extends AbstractOrganism implements IPositionObserver {
                 this.position = newPosition;
             }
             loosEnergy();
+            push(this);
         }
     }
 
     public int getLifeTime() {
         return this.lifeTime;
     }
-
     public int getChildren() {
         return this.children;
+    }
+    public Trackable getTracker() { return tracker; }
+    public void setTracker(Trackable tracker) {
+        this.tracker = tracker;
+        this.childrenList.clear();
     }
 
     @Override
@@ -83,14 +93,15 @@ public class Animal extends AbstractOrganism implements IPositionObserver {
     }
 
     //TODO tak
-    public int fuck(boolean magic) {
+    public int fuck(Animal child, boolean magic) {
+        if (this.tracker != null) this.childrenList.add(child);
         this.energy = magic ? this.energy : 3 * this.energy / 4;
         this.children += 1;
         return this.energy / 4;
     }
 
     public void eat(int eatGain) {
-        energy += eatGain; //TODO this should be a param
+        energy += eatGain;
     }
 
     @Override
@@ -108,5 +119,8 @@ public class Animal extends AbstractOrganism implements IPositionObserver {
                 ", " + energy + " }";
     }
 
-
+    @Override
+    public void push(Animal animal) {
+        if(this.tracker != null) this.tracker.push(animal);
+    }
 }

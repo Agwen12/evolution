@@ -1,5 +1,6 @@
 package agh.ics.project.GUI;
 
+import javafx.collections.ObservableList;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
@@ -9,7 +10,6 @@ import javafx.scene.layout.VBox;
 import java.util.Map;
 
 public class ChartContainer {
-
     private final LineChart<Number, Number> counter;
     private final LineChart<Number, Number> energy;
     private final LineChart<Number, Number> lifeTime;
@@ -32,7 +32,6 @@ public class ChartContainer {
         return new VBox(line1, line2);
     }
 
-
     public void updateCharts(Map<String, Double> stats) {
         double epoch = stats.get("epoch");
         energy.getData().get(0).getData().add(new XYChart.Data<>(epoch, stats.get("energy")));
@@ -50,6 +49,7 @@ public class ChartContainer {
 
         LineChart<Number, Number> plot = new LineChart<>(xAxis, yAxis);
         plot.setAnimated(true);
+        plot.setCreateSymbols(false);
 
         XYChart.Series<Number, Number> series = new XYChart.Series<>();
         series.setName(stat);
@@ -59,4 +59,10 @@ public class ChartContainer {
 
         return plot;
     }
+
+    public ObservableList<XYChart.Data<Number, Number>> getAnimal() { return counter.getData().get(0).getData(); }
+    public ObservableList<XYChart.Data<Number, Number>> getGrass() { return counter.getData().get(1).getData(); }
+    public ObservableList<XYChart.Data<Number, Number>> getEnergy() { return energy.getData().get(0).getData(); }
+    public ObservableList<XYChart.Data<Number, Number>> getLifeTime() { return lifeTime.getData().get(0).getData(); }
+    public ObservableList<XYChart.Data<Number, Number>> getChildren() { return children.getData().get(0).getData(); }
 }

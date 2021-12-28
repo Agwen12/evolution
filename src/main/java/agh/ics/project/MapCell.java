@@ -19,9 +19,7 @@ public class MapCell {
     public MapCell(AbstractOrganism organism) {
         cellSet.add(organism);
     }
-
     public MapCell(){};
-
 
     public void placeElement(AbstractOrganism organism) {
         this.cellSet.add(organism);
@@ -35,7 +33,6 @@ public class MapCell {
     }
 
     public Animal getSecond() {
-
         if (cellSet.size() > 1) {
             AbstractOrganism[] array = cellSet.toArray(AbstractOrganism[]::new);
             if (array[array.length - 2] instanceof Animal) return (Animal) array[array.length - 2];
@@ -43,27 +40,20 @@ public class MapCell {
         return null;
     }
 
-    public List<AbstractOrganism> getContents() {
-        return new ArrayList<>(this.cellSet);
-    }
-
-    public boolean hasGrass() {
-        return !cellSet.isEmpty() && this.cellSet.first() instanceof Grass;
-    }
 
     public Grass getGrass() {
         if (this.hasGrass()) return (Grass) this.cellSet.first();
         return null;
     }
 
+    public List<AbstractOrganism> getContents() { return new ArrayList<>(this.cellSet); }
+    public boolean hasGrass() { return !cellSet.isEmpty() && this.cellSet.first() instanceof Grass; }
     public boolean removeElement(AbstractOrganism organism) {
         return this.cellSet.remove(organism);
     }
-
     public boolean isEmpty() {
         return this.cellSet.isEmpty();
     }
-
     public int animalSize() {
         return this.hasGrass() ? cellSet.size() - 1: cellSet.size();
     }
