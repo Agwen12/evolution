@@ -3,6 +3,13 @@ package agh.ics.project;
 public class BoundedMap extends AbstractMap {
 
 
+    public BoundedMap(int height, int width, float jungleRatio) {
+        this.height = height;
+        this.width = width;
+        this.jungleRatio = jungleRatio;
+        placeJungle();
+    }
+
     @Override
     public Vector2d moveAnimal(Vector2d currPosition, Orientation orientation) {
         Vector2d temp = new Vector2d(currPosition.x, currPosition.y).add(orientation.toUnitVector());
@@ -10,10 +17,5 @@ public class BoundedMap extends AbstractMap {
             return temp;
         }
         return currPosition;
-    }
-
-    @Override
-    public void positionChanged(Animal animal, Vector2d oldPosition, Vector2d newPosition) {
-
     }
 }
