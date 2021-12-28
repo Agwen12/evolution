@@ -27,7 +27,7 @@ public class Animal extends AbstractOrganism implements IPositionObserver, Track
 
     public Animal(AbstractMap map, Animal parent1, Animal parent2) {
         this.position = parent1.position;
-        this.energy = (int) (parent1.energy / 4 + parent2.energy / 4);
+        this.energy = (parent1.energy / 4 + parent2.energy / 4);
         this.map = map;
         double energyRation = (parent1.energy * 1.d) / ((parent1.energy + parent2.energy) * 1.d);
         if (rand.nextBoolean()) {
@@ -61,6 +61,7 @@ public class Animal extends AbstractOrganism implements IPositionObserver, Track
         }
     }
 
+    public int getEnergy() { return this.energy; }
     public int getLifeTime() {
         return this.lifeTime;
     }
@@ -92,8 +93,7 @@ public class Animal extends AbstractOrganism implements IPositionObserver, Track
         this.energy = this.energy -  1;
     }
 
-    //TODO tak
-    public int fuck(Animal child, boolean magic) {
+    public int procreate(Animal child, boolean magic) {
         if (this.tracker != null) this.childrenList.add(child);
         this.energy = magic ? this.energy : 3 * this.energy / 4;
         this.children += 1;

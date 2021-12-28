@@ -27,7 +27,6 @@ public abstract class AbstractMap implements IPositionObserver {
      */
     public abstract Vector2d moveAnimal(Vector2d currPosition, Orientation orientation);
 
-    //TODO dont allow too big or too small jungle
     protected void placeJungle() {
         Vector2d center = new Vector2d(this.width / 2, this.height / 2);
         int jungleWidth = (int) (this.width * jungleRatio);

@@ -197,6 +197,16 @@ public class App extends Application implements IEngineObserver {
             };
             writer.writeData(row);
         }
+
+        String[] lastRow = new String[] {
+                animal.get(animal.size() - 1).getXValue().toString(),
+                String.valueOf(animal.stream().mapToDouble(data -> data.getYValue().doubleValue()).average().orElse(Double.NaN)),
+                String.valueOf(grass.stream().mapToDouble(data -> data.getYValue().doubleValue()).average().orElse(Double.NaN)),
+                String.valueOf(energy.stream().mapToDouble(data -> data.getYValue().doubleValue()).average().orElse(Double.NaN)),
+                String.valueOf(children.stream().mapToDouble(data -> data.getYValue().doubleValue()).average().orElse(Double.NaN)),
+                String.valueOf(lifeSpan.stream().mapToDouble(data -> data.getYValue().doubleValue()).average().orElse(Double.NaN))
+        };
+        writer.writeData(lastRow);
         writer.close();
     }
 

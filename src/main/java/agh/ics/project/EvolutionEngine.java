@@ -1,8 +1,5 @@
 package agh.ics.project;
 
-import com.sun.javafx.collections.MappingChange;
-import javafx.scene.chart.LineChart;
-
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -74,15 +71,26 @@ public class EvolutionEngine implements Runnable, IEngineObserver {
         return animal;
     }
 
-    //TODO splitting grass when there's >1 biggest energies
     private void eatGrass() {
         for (Vector2d vector: map.mapElements.keySet()) {
             MapCell cell = map.getMapCellAt(vector);
             if (cell.hasGrass() && cell.getBiggestEnergy() != null) {
+
                 Grass grass = cell.getGrass();
                 engineGrass.remove(grass);
                 map.removeObject(grass, vector);
+                if(cell.getSecond() != null && (cell.getBiggestEnergy().energy == cell.getSecond().energy)) {
+                    List<AbstractOrganism> list = cell.getContents();
+                    Integer biggestEnergy = list.stream()
+                            .filter((organism -> organism.energy == cell.getBiggestEnergy().energy))
+                            .map(animal -> 1)
+                            .reduce(0, Integer::sum);
+                    list.stream()
+                            .filter((organism -> organism.energy == cell.getBiggestEnergy().energy))
+                            .forEach(animal -> ((Animal) animal).eat(this.eatingGain/biggestEnergy) );
+                } else {
                 cell.getBiggestEnergy().eat(this.eatingGain);
+                }
             }
         }
     }
@@ -95,10 +103,9 @@ public class EvolutionEngine implements Runnable, IEngineObserver {
                 Animal second = cell.getSecond();
 
                 if (second != null && first != null && second.energy >= startEnergy / 2) {
-                    //TODO maybe change it later
                     Animal newAnimal = new Animal(map, first, second);
-                    first.fuck(newAnimal, this.magicReproduction);
-                    second.fuck(newAnimal, this.magicReproduction);
+                    first.procreate(newAnimal, this.magicReproduction);
+                    second.procreate(newAnimal, this.magicReproduction);
                     addToGenePool(newAnimal);
                     map.placeObject(newAnimal);
                     engineAnimal.add(newAnimal);
