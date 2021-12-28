@@ -14,12 +14,12 @@ import java.util.Map;
 
 public class Tracker implements Trackable {
 
-    private TextField descendantsField;
-    private TextField childrenField;
-    private TextField deathTimeField;
-    private EvolutionEngine engine;
+    private final TextField descendantsField;
+    private final TextField childrenField;
+    private final TextField deathTimeField;
+    private final EvolutionEngine engine;
     private final GridPane grid;
-    private Animal animal;
+    private final Animal animal;
 
     public Tracker(EvolutionEngine engine, Animal animal) {
         this.animal = animal;
@@ -28,7 +28,7 @@ public class Tracker implements Trackable {
 
         childrenField = new TextField();
         descendantsField = new TextField();
-        deathTimeField = new TextField();
+        deathTimeField = new TextField("Still ALIVE");
 
         childrenField.setEditable(false);
         descendantsField.setEditable(false);
@@ -62,10 +62,16 @@ public class Tracker implements Trackable {
         return sum;
     }
 
+    public void killTracker() {
+        this.animal.setTracker(null);
+    }
+
     @Override
-    public void push(Animal animal) {
+    public void push() {
+        System.out.println(animal);
+        System.out.println("TRAKER TRACKER TRACKER");
         childrenField.setText(Integer.toString(this.animal.getChildren()));
         descendantsField.setText(Integer.toString(sumChildren() + this.animal.getChildren()));
-        deathTimeField.setText(this.animal.isDead() ? Integer.toString(engine.getEpoch()) : "Still Alive!") ;
+        if (animal.isDead()) deathTimeField.setText(Integer.toString(engine.getEpoch())) ;
     }
 }

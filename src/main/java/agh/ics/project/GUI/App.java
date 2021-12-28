@@ -16,8 +16,6 @@ import javafx.stage.Stage;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -107,6 +105,7 @@ public class App extends Application implements IEngineObserver {
 
         paramStage.setScene(new Scene(vbox));
         paramStage.show();
+
     }
 
 
@@ -140,7 +139,7 @@ public class App extends Application implements IEngineObserver {
 
         for (int i = 0; i < map.width + 1; i++) {
             Label label = new Label(Integer.toString(i));
-            grid.add(label, i, map.height + 2);
+            grid.add(label, i,map.height + 2);
             GridPane.setHalignment(label, HPos.CENTER);
             grid.getColumnConstraints().add(new ColumnConstraints(CELL_SIZE));
 
@@ -173,7 +172,7 @@ public class App extends Application implements IEngineObserver {
         engine.setPaused(false);
     }
 
-    private void safeData(ChartContainer chartContainer, boolean isLeft) throws IOException {
+    private void saveData(ChartContainer chartContainer, boolean isLeft) throws IOException {
         String mapSymbol = isLeft ? "Torus" : "Border";
         String fileName = "stats_" + mapSymbol + "_" + System.currentTimeMillis() + ".csv";
         File file = new File(fileName);
@@ -230,7 +229,7 @@ public class App extends Application implements IEngineObserver {
         stopT.setOnAction((event) -> stopAnimation(isLeft ? this.engineT : this.engineB ));
         safeData.setMinSize(80d, 30);
         safeData.setOnAction(event -> {
-            try { safeData(isLeft ? chartContainerT : chartContainerB, isLeft);
+            try { saveData(isLeft ? chartContainerT : chartContainerB, isLeft);
             } catch (IOException e) {
                 e.printStackTrace(); } });
         Button domButton = new Button("Show dominant");
@@ -288,19 +287,21 @@ public class App extends Application implements IEngineObserver {
         Scene scene = new Scene(scrollPane);
         primaryStage.setScene(scene);
         primaryStage.show();
+
     }
 
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         root.setAlignment(Pos.CENTER);
-        root.setSpacing(120);
+        root.setSpacing(40);
         loadSimulationArguments(primaryStage);
     }
 
     @Override
-    public void makeMoves(boolean isTorus, Map<String, Double> stats) {
+    public void makeMoves(boolean isTorus, Map<String, Double> stats, boolean magicHappened) {
         Platform.runLater( () -> {
+
             if (isTorus)  {
                 displayMap(this.gridT, mapT);
                 chartContainerT.updateCharts(stats);
@@ -308,6 +309,17 @@ public class App extends Application implements IEngineObserver {
                 displayMap(this.gridB, mapB);
                 chartContainerB.updateCharts(stats);
             }
+            showMagicAlert(isTorus, stats.get("epoch").toString() ,magicHappened);
+
         });
+    }
+
+    private void showMagicAlert(boolean isTorus, String epoch, boolean magicHappened) {
+        if (magicHappened) {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            String map = isTorus ? "Torus map" : "Border map";
+            alert.setHeaderText("Magic happened on " + map + "in epoch: " + epoch);
+            alert.show();
+        }
     }
 }

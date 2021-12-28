@@ -30,12 +30,7 @@ public class BoxElement {
             rectangle.setFill(Color.rgb(red, green, 0));
 
             rectangle.setOnMouseClicked(action -> {
-                //TODO sledzenie zwierzaka
-                if (engine.isPaused()) {
-                    showInfo((Animal) organism);
-                }
-
-            });
+                if (engine.isPaused()) { showInfo((Animal) organism); } });
         } else {
             //Tak, trawa jest niebieska
             rectangle.setFill(Color.rgb(0,0,255));

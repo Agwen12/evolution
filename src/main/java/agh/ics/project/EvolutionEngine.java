@@ -51,7 +51,10 @@ public class EvolutionEngine implements Runnable, IEngineObserver {
 
 
     private void moveAnimals() {
-            this.engineAnimal.forEach(Animal::move);
+        for(Animal animal: this.engineAnimal) {
+            animal.move(this.moveCost);
+        }
+
     }
 
     private void removeDeadAnimals() {
@@ -62,7 +65,7 @@ public class EvolutionEngine implements Runnable, IEngineObserver {
     }
 
     private Animal cutDead(Animal animal) {
-        if (animal.isDead()) {
+        if (animal.isDead() && (animal.getTracker() == null)) {
             removeFromGenePool(animal);
             this.deathTime.add(animal.getLifeTime());
             this.map.removeObject(animal, animal.getPosition());
@@ -86,7 +89,7 @@ public class EvolutionEngine implements Runnable, IEngineObserver {
                             .map(animal -> 1)
                             .reduce(0, Integer::sum);
                     list.stream()
-                            .filter((organism -> organism.energy == cell.getBiggestEnergy().energy))
+                            .filter((organism -> (organism.energy == cell.getBiggestEnergy().energy) && organism instanceof Animal ))
                             .forEach(animal -> ((Animal) animal).eat(this.eatingGain/biggestEnergy) );
                 } else {
                 cell.getBiggestEnergy().eat(this.eatingGain);
@@ -114,8 +117,9 @@ public class EvolutionEngine implements Runnable, IEngineObserver {
         }
     }
 
-    private void makeMagicLove() {
-        if (this.magicLeft > 0 && rand.nextInt(10) > 6) {
+    private boolean makeMagicLove() {
+        boolean condition = this.magicLeft > 0 && rand.nextInt(10) > 8;
+        if (condition) {
             List<List<Vector2d>> free2D = getFreePositions();
             List<Vector2d> freePositions = new LinkedList<>(free2D.get(0));
             freePositions.addAll(free2D.get(1));
@@ -132,11 +136,15 @@ public class EvolutionEngine implements Runnable, IEngineObserver {
             this.engineAnimal.addAll(tempAnimals);
             this.magicLeft -= 1;
         }
+        return condition;
     }
 
-    private void makeSweetLove() {
-        if (magicReproduction) makeMagicLove();
-        else makeBasicLove();
+    private boolean makeSweetLove() {
+        if (magicReproduction) {
+            return makeMagicLove();
+
+        } else makeBasicLove();
+        return false;
     }
 
     private void plantGrass() {
@@ -183,10 +191,10 @@ public class EvolutionEngine implements Runnable, IEngineObserver {
                 removeDeadAnimals();
                 moveAnimals();
                 eatGrass();
-                makeSweetLove();
+                boolean magicHappened = makeSweetLove();
                 plantGrass();
-                makeMoves(this.map instanceof TorusMap, this.getStats());
-                System.out.println(epoch);
+                makeMoves(this.map instanceof TorusMap, this.getStats(), magicHappened);
+//                System.out.println(epoch);
                 this.epoch += 1;
                 try {
                     TimeUnit.SECONDS.sleep(1);
@@ -268,7 +276,7 @@ public class EvolutionEngine implements Runnable, IEngineObserver {
     }
 
     @Override
-    public void makeMoves(boolean isTorus, Map<String, Double> stats) {
-        observers.forEach(observer -> observer.makeMoves(isTorus, stats));
+    public void makeMoves(boolean isTorus, Map<String, Double> stats, boolean magicHappened) {
+        observers.forEach(observer -> observer.makeMoves(isTorus, stats, magicHappened));
     }
 }
